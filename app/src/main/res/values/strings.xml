@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Volume Power Plus</string>
+    <string name="accessibility_description">Lets the app read the hardware volume key so it can act as the Power button (wake / lock the screen). It does not read or store any screen content.</string>
+    <string name="admin_explanation">Device admin is only used to lock the screen when you press the trigger key.</string>
+</resources>
