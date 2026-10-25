@@ -1,0 +1,37 @@
+package com.volumepower.plus
+
+import android.content.Context
+import android.view.KeyEvent
+
+object Prefs {
+    private fun sp(c: Context) = c.getSharedPreferences("volume_power_plus", Context.MODE_PRIVATE)
+
+    fun featureEnabled(c: Context) = sp(c).getBoolean("enabled", true)
+    fun setFeatureEnabled(c: Context, v: Boolean) = sp(c).edit().putBoolean("enabled", v).apply()
+
+    fun triggerKey(c: Context) = sp(c).getInt("trigger", KeyEvent.KEYCODE_VOLUME_UP)
+    fun setTriggerKey(c: Context, v: Int) = sp(c).edit().putInt("trigger", v).apply()
+
+    fun startOnBoot(c: Context) = sp(c).getBoolean("boot", true)
+    fun setStartOnBoot(c: Context, v: Boolean) = sp(c).edit().putBoolean("boot", v).apply()
+
+    fun autoHeal(c: Context) = sp(c).getBoolean("heal", true)
+    fun setAutoHeal(c: Context, v: Boolean) = sp(c).edit().putBoolean("heal", v).apply()
+
+    fun keepAlive(c: Context) = sp(c).getBoolean("keepalive", true)
+    fun setKeepAlive(c: Context, v: Boolean) = sp(c).edit().putBoolean("keepalive", v).apply()
+
+    fun useAdminLock(c: Context) = sp(c).getBoolean("adminlock", false)
+    fun setUseAdminLock(c: Context, v: Boolean) = sp(c).edit().putBoolean("adminlock", v).apply()
+
+    /** AppCompatDelegate night mode: -1 follow system, 1 light, 2 dark */
+    fun themeMode(c: Context) = sp(c).getInt("theme", -1)
+    fun setThemeMode(c: Context, v: Int) = sp(c).edit().putInt("theme", v).apply()
+
+    /** Notification priority: 0 hidden (min), 1 low, 2 normal */
+    fun notifPriority(c: Context) = sp(c).getInt("notif", 0)
+    fun setNotifPriority(c: Context, v: Int) = sp(c).edit().putInt("notif", v).apply()
+
+    fun shizukuKeys(c: Context) = sp(c).getBoolean("shizuku", true)
+    fun setShizukuKeys(c: Context, v: Boolean) = sp(c).edit().putBoolean("shizuku", v).apply()
+}
