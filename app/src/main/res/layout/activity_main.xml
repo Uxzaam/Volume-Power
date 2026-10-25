@@ -59,10 +59,16 @@
             app:singleSelection="true">
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnKeyUp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 style="?attr/materialButtonOutlinedStyle"
                 android:text="Volume up" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnKeyDown"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 style="?attr/materialButtonOutlinedStyle"
                 android:text="Volume down" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
@@ -156,14 +162,23 @@
             app:singleSelection="true">
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnThemeSystem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 style="?attr/materialButtonOutlinedStyle"
                 android:text="System" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnThemeLight"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 style="?attr/materialButtonOutlinedStyle"
                 android:text="Day" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnThemeDark"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 style="?attr/materialButtonOutlinedStyle"
                 android:text="Night" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
@@ -182,14 +197,23 @@
             app:singleSelection="true">
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnNotifHidden"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 style="?attr/materialButtonOutlinedStyle"
                 android:text="Hidden" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnNotifLow"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 style="?attr/materialButtonOutlinedStyle"
                 android:text="Low" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnNotifNormal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 style="?attr/materialButtonOutlinedStyle"
                 android:text="Normal" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
