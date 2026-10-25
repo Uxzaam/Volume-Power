@@ -11,8 +11,8 @@ android {
         applicationId = "com.volumepower.plus"
         minSdk = 29
         targetSdk = 35
-        versionCode = 6
-        versionName = "3.2"
+        versionCode = 7
+        versionName = "4.0"
     }
     buildTypes {
         release { isMinifyEnabled = false }

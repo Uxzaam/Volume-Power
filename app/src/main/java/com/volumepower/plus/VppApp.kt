@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
-import com.google.android.material.color.DynamicColors
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -16,7 +15,6 @@ class VppApp : Application() {
         if (Application.getProcessName().endsWith(":crash")) return
         installCrashHandler()
         AppCompatDelegate.setDefaultNightMode(Prefs.themeMode(this))
-        DynamicColors.applyToActivitiesIfAvailable(this)
     }
 
     private fun installCrashHandler() {
