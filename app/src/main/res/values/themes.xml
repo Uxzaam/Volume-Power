@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.VPP" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/ios_blue</item>
+        <item name="android:windowBackground">@color/ios_bg</item>
+    </style>
+</resources>

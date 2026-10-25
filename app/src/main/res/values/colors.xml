@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ios_bg">#F2F2F7</color>
+    <color name="ios_card">#FFFFFF</color>
+    <color name="ios_card_stroke">#12000000</color>
+    <color name="ios_code_bg">#F2F2F7</color>
+    <color name="ios_label">#000000</color>
+    <color name="ios_secondary">#6C6C70</color>
+    <color name="ios_sep">#E5E5EA</color>
+    <color name="ios_blue">#007AFF</color>
+    <color name="ios_green">#34C759</color>
+    <color name="ios_red">#FF3B30</color>
+    <color name="ios_orange">#FF9500</color>
+    <color name="ios_purple">#AF52DE</color>
+    <color name="ios_indigo">#5856D6</color>
+    <color name="ios_teal">#30B0C7</color>
+    <color name="ios_gray">#8E8E93</color>
+    <color name="ios_telegram">#24A1DE</color>
+    <color name="ios_switch_off">#E9E9EA</color>
+    <color name="ios_seg_track">#E3E3E8</color>
+    <color name="ios_seg_selected">#FFFFFF</color>
+    <color name="ios_btn">#14007AFF</color>
+    <color name="ios_pill_ok_bg">#1834C759</color>
+    <color name="ios_pill_err_bg">#14FF3B30</color>
+</resources>
