@@ -1,46 +1,44 @@
 # Volume Power Plus
 
-Created by **Gulam Azam Faridi** 🇧🇩 · Telegram: https://t.me/GulamAzamFaridi
+**Version:** 4.1  
+**Package:** `com.volumepower.plus`
 
-**v4.1:** minimal Apple-style UI (icon tiles, grouped cards), new app icon, the manual ADB command and steps now live in an *Advanced* card at the bottom of the app, and a *Creator* card. All functions are unchanged.
+**Volume Power Plus** remaps your Volume Up or Volume Down button to act as the Power button—built for devices with a broken, worn-out, or unresponsive physical power key.
 
-**v4.2:** new *Wake screen in calls* switch. If a screen protector keeps the proximity sensor stuck on "near", the display stays off during calls and the trigger key could not wake it. With Shizuku granted, the trigger key now wakes the screen during a call with a real Power key press, which makes Android ignore the stuck sensor.
+> **Note:** This package (`com.volumepower.plus`) it is never as replacement of power key Rather it is a temporary Solution.
+And Made With Claude and Gemini 🥸
+---
 
-Rewrite of Volume Power App v1.1 (same idea: a volume key does the Power button's job) with:
+## Features
 
-- Self-healing accessibility service (re-enabled automatically if Android turns it off)
-- Optional device-admin lock
-- Wireless-ADB `WRITE_SECURE_SETTINGS` setup screen
-- Start on boot
+- **Self-Healing Accessibility Service:** Automatically re-enables the service if Android turns it off in the background.
+- **Media-Aware Screen Wake:** Wakes the screen with the volume trigger key even while music or video apps are playing.
+- **Optional Device Admin Lock:** Locks the screen using Android Device Administrator privileges.
+- **Wireless ADB Setup Screen:** Built-in setup flow for granting `WRITE_SECURE_SETTINGS`.
+- **Start on Boot:** Automatically starts when the phone restarts.
 
-Package: `com.volumepower.plus` (installs next to the original; both use the same key, so disable one).
+---
 
-## Build the APK
+## First-Time Setup
+Allow All Permission for better stability .
 
-**Option A – GitHub (no Android Studio):**
-1. Create a new GitHub repo and upload everything in this folder (keep `.github/`).
-2. Open the *Actions* tab → *Build APK* → wait for green.
-3. Download `VolumePowerPlus-apk` from the run, unzip, install `app-debug.apk`.
+### 1. Basic Permissions
+1. Install and open **Volume Power Plus**, then allow notifications when prompted.
+2. Go to **Settings → Accessibility → Volume Power Plus** and turn it on.
+   - *If the toggle is greyed out ("Restricted setting"):* Go to **Settings → Apps → Volume Power Plus**, tap the **⋮** menu in the top-right corner, and select **Allow restricted settings**. Then return to Accessibility and turn the service on.
 
-**Option B – Android Studio:** open this folder, let it sync, *Build → Build APK(s)*.
+### 2. Grant `WRITE_SECURE_SETTINGS` (One-Time Setup)
+This permission allows the app to keep its Accessibility Service active automatically. Choose **Option A (Shizuku)** or **Option B (ADB)**.
 
-## First-time setup on the Pixel 6a
+#### Option A: Shizuku Setup (Recommended — No PC Needed)
+1. Install [Shizuku](https://shizuku.rikka.app/download/).
+2. Connect to Wi-Fi, then go to **Settings → Developer options → Wireless debugging** and turn it on.
+3. Open **Shizuku**, tap **Start via Wireless debugging**, and follow the on-screen pairing steps. *(You may need to restart Shizuku after rebooting your phone.)*
+4. Open **Volume Power Plus**, tap **Allow this app**, and tap **Grant all permissions**.
 
-1. Install, open the app, allow notifications.
-2. Settings → Accessibility → Volume Power Plus → turn on.
-   If it is greyed out ("restricted setting"): App info → ⋮ → *Allow restricted settings*.
-3. Grant the special permission once (from PC, or Termux with `pkg install android-tools`):
-   `adb pair localhost:<pairing-port>` then `adb connect localhost:<port>` then
-   `adb shell pm grant com.volumepower.plus android.permission.WRITE_SECURE_SETTINGS`
-4. In the app: disable battery optimisation, optionally make it device admin.
+#### Option B: ADB Setup (via PC or Termux)
+If you are using Termux on your phone, install `android-tools` first (`pkg install android-tools`). Pair with Wireless Debugging and run:
 
-Note: if you switch the service off on purpose, turn off *Auto re-enable* or the main switch first.
+```bash
 
-
-## Shizuku setup (recommended, no PC needed)
-
-1. Install Shizuku (https://shizuku.rikka.app/download/).
-2. Settings > Developer options > Wireless debugging: on (needs Wi-Fi).
-3. Open Shizuku > "Start via Wireless debugging" and follow the pairing steps. After a reboot you may need to start it again.
-4. Open Volume Power Plus > tap *Allow this app*, then *Grant all permissions*.
-5. Lock the phone and press the trigger key: the screen turns on even if a music/video app is playing.
+adb shell pm grant com.volumepower.plus android.permission.WRITE_SECURE_SETTINGS
