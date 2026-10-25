@@ -9,16 +9,7 @@ Rewrite of Volume Power App v1.1 (same idea: a volume key does the Power button'
 
 Package: `com.volumepower.plus` (installs next to the original; both use the same key, so disable one).
 
-## Build the APK
-
-**Option A – GitHub (no Android Studio):**
-1. Create a new GitHub repo and upload everything in this folder (keep `.github/`).
-2. Open the *Actions* tab → *Build APK* → wait for green.
-3. Download `VolumePowerPlus-apk` from the run, unzip, install `app-debug.apk`.
-
-**Option B – Android Studio:** open this folder, let it sync, *Build → Build APK(s)*.
-
-## First-time setup on the Pixel 6a
+## First-time setup 
 
 1. Install, open the app, allow notifications.
 2. Settings → Accessibility → Volume Power Plus → turn on.
@@ -31,7 +22,8 @@ Package: `com.volumepower.plus` (installs next to the original; both use the sam
 Note: if you switch the service off on purpose, turn off *Auto re-enable* or the main switch first.
 
 
-## Shizuku setup (recommended, no PC needed)
+## Alternative for step 3
+Shizuku setup (recommended, no PC needed)
 
 1. Install Shizuku (https://shizuku.rikka.app/download/).
 2. Settings > Developer options > Wireless debugging: on (needs Wi-Fi).
