@@ -5,8 +5,8 @@
 
 **Volume Power Plus** remaps your Volume Up or Volume Down button to act as the Power button—built for devices with a broken, worn-out, or unresponsive physical power key.
 
-> **Note:** This package (`com.volumepower.plus`) installs alongside the original Volume Power app. Because both apps listen to the same volume key, disable or uninstall the original before using this version.
-
+> **Note:** This package (`com.volumepower.plus`) it is never as replacement of power key Rather it is a temporary Solution.
+And Made With Claude and Gemini 🥸
 ---
 
 ## Features
@@ -20,6 +20,7 @@
 ---
 
 ## First-Time Setup
+Allow All Permission for better stability .
 
 ### 1. Basic Permissions
 1. Install and open **Volume Power Plus**, then allow notifications when prompted.
