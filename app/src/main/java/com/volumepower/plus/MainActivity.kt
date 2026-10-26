@@ -29,10 +29,12 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
 
@@ -59,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val scroll = ScrollView(this)
-        scroll.setBackgroundColor(col(R.color.ios_bg))
+        scroll.setBackgroundColor(col(R.color.md_background))
         scroll.isFillViewport = true
         scroll.clipToPadding = false
         val page = LinearLayout(this)
@@ -79,7 +81,7 @@ class MainActivity : AppCompatActivity() {
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
 
-        // ---- Header: app icon, title, version ----
+        // Compact Material 3 header
         val version = try {
             packageManager.getPackageInfo(packageName, 0).versionName ?: ""
         } catch (_: Exception) {
@@ -90,37 +92,43 @@ class MainActivity : AppCompatActivity() {
         header.gravity = Gravity.CENTER_VERTICAL
         val logo = ImageView(this)
         logo.setImageResource(R.drawable.ic_app_tile)
-        header.addView(logo, lp(dp(56), dp(56)))
+        header.addView(logo, lp(dp(48), dp(48)))
         val titles = LinearLayout(this)
         titles.orientation = LinearLayout.VERTICAL
         val title = TextView(this)
-        title.text = "Volume Power"
-        title.textSize = 30f
+        title.text = "Volume Power Plus"
+        title.textSize = 24f
         title.typeface = Typeface.DEFAULT_BOLD
-        title.setTextColor(col(R.color.ios_label))
+        title.setTextColor(col(R.color.md_on_surface))
         titles.addView(title, lp(WRAP, WRAP))
         val sub = TextView(this)
-        sub.text = if (version.isEmpty()) "Plus" else "Plus  \u00B7  v$version"
-        sub.textSize = 14f
-        sub.setTextColor(col(R.color.ios_secondary))
+        sub.text = if (version.isEmpty()) "Wake and lock with a volume key" else "Wake and lock with a volume key · v$version"
+        sub.textSize = 13f
+        sub.setTextColor(col(R.color.md_on_surface_variant))
         titles.addView(sub, lp(WRAP, WRAP))
         header.addView(titles, lp(0, WRAP, 1f).apply { marginStart = dp(14) })
         page.addView(header, lp(MATCH, WRAP).apply { topMargin = dp(8) })
 
-        // ---- Status ----
+        // System status summary
         val statusCard = card()
+        statusCard.setPadding(dp(16), dp(12), dp(16), dp(12))
+        val statusTitle = TextView(this)
+        statusTitle.text = "System status"
+        statusTitle.textSize = 14f
+        statusTitle.typeface = Typeface.DEFAULT_BOLD
+        statusTitle.setTextColor(col(R.color.md_on_surface))
+        statusCard.addView(statusTitle, lp(MATCH, WRAP))
         statusRow = LinearLayout(this)
         statusRow.orientation = LinearLayout.HORIZONTAL
         statusRow.gravity = Gravity.CENTER_VERTICAL
-        statusRow.setPadding(dp(8), dp(14), dp(8), dp(14))
-        statusCard.addView(statusRow, lp(MATCH, WRAP))
+        statusCard.addView(statusRow, lp(MATCH, WRAP).apply { topMargin = dp(12) })
         page.addView(statusCard, lp(MATCH, WRAP).apply { topMargin = dp(20) })
 
-        // ---- Card 1: main ----
+        // Core controls
+        page.addView(caption("CONTROLS"), lp(WRAP, WRAP).apply { topMargin = dp(24); marginStart = dp(4) })
         val c1 = card()
-        page.addView(c1, lp(MATCH, WRAP).apply { topMargin = dp(18) })
-
-        c1.addSwitch("Volume key as power", R.drawable.ic_power, R.color.tile_red, Prefs.featureEnabled(this)) { v ->
+        page.addView(c1, lp(MATCH, WRAP).apply { topMargin = dp(8) })
+        c1.addSwitch("Volume key as power", R.drawable.ic_power, Prefs.featureEnabled(this)) { v ->
             Prefs.setFeatureEnabled(this, v)
             if (v) {
                 SelfHeal.healIfWanted(this)
@@ -130,111 +138,79 @@ class MainActivity : AppCompatActivity() {
             }
             refresh()
         }
-        c1.addSegmented(
-            "Trigger key", R.drawable.ic_volume, R.color.tile_blue,
+        c1.addChoice(
+            "Trigger key", R.drawable.ic_volume,
             listOf("Vol up", "Vol down"),
-            if (Prefs.triggerKey(this) == KeyEvent.KEYCODE_VOLUME_DOWN) 1 else 0, 150
+            if (Prefs.triggerKey(this) == KeyEvent.KEYCODE_VOLUME_DOWN) 1 else 0
         ) { i ->
             Prefs.setTriggerKey(this, if (i == 1) KeyEvent.KEYCODE_VOLUME_DOWN else KeyEvent.KEYCODE_VOLUME_UP)
         }
-        c1.addSwitch("Start on boot", R.drawable.ic_play, R.color.tile_green, Prefs.startOnBoot(this)) {
+        c1.addSwitch("Start on boot", R.drawable.ic_play, Prefs.startOnBoot(this)) {
             Prefs.setStartOnBoot(this, it)
         }
-        c1.addSwitch("Re-enable accessibility", R.drawable.ic_refresh, R.color.tile_indigo, Prefs.autoHeal(this)) {
+        c1.addSwitch("Re-enable accessibility", R.drawable.ic_refresh, Prefs.autoHeal(this)) {
             Prefs.setAutoHeal(this, it)
         }
-        c1.addSwitch("Silent audio keep-alive", R.drawable.ic_wave, R.color.tile_pink, Prefs.keepAlive(this)) { v ->
+        c1.addSwitch("Silent audio keep-alive", R.drawable.ic_wave, Prefs.keepAlive(this)) { v ->
             Prefs.setKeepAlive(this, v)
             if (Prefs.featureEnabled(this)) VolumePowerForegroundService.start(this)
         }
-        c1.addSwitch("Use Shizuku for key", R.drawable.ic_terminal, R.color.tile_teal, Prefs.shizukuKeys(this)) { v ->
+        c1.addSwitch("Use Shizuku for key", R.drawable.ic_terminal, Prefs.shizukuKeys(this)) { v ->
             Prefs.setShizukuKeys(this, v)
             if (Prefs.featureEnabled(this)) VolumePowerForegroundService.start(this)
         }
-        c1.addSwitch("Wake screen in calls", R.drawable.ic_phone, R.color.tile_green, Prefs.callFix(this)) {
+        c1.addSwitch("Wake screen in calls", R.drawable.ic_phone, Prefs.callFix(this)) {
             Prefs.setCallFix(this, it)
         }
 
-        // ---- Card 2: admin, look, notification ----
+        // Optional Device Administrator controls
+        page.addView(caption("DEVICE ADMIN"), lp(WRAP, WRAP).apply { topMargin = dp(24); marginStart = dp(4) })
         val admin = ComponentName(this, AdminReceiver::class.java)
-        val dpm = getSystemService(DevicePolicyManager::class.java)
+        val activeAdmin = isDeviceAdminActive(admin)
         val c2 = card()
-        page.addView(c2, lp(MATCH, WRAP).apply { topMargin = dp(18) })
-
-        swAdmin = c2.addSwitch("Device admin", R.drawable.ic_shield, R.color.tile_orange, dpm.isAdminActive(admin)) { on ->
-            if (on) {
-                startActivity(
-                    Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-                        .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin)
-                        .putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.admin_explanation))
-                )
-            } else {
-                dpm.removeActiveAdmin(admin)
-                refresh()
-            }
+        page.addView(c2, lp(MATCH, WRAP).apply { topMargin = dp(8) })
+        swAdmin = c2.addSwitch("Device admin", R.drawable.ic_shield, activeAdmin) { enabled ->
+            setDeviceAdminEnabled(admin, enabled)
         }
         swAdminLock = c2.addSwitch(
-            "Lock with admin (PIN after)", R.drawable.ic_lock, R.color.tile_gray, Prefs.useAdminLock(this)
-        ) {
-            Prefs.setUseAdminLock(this, it)
-        }
-        c2.addSegmented(
-            "Appearance", R.drawable.ic_contrast, R.color.tile_purple,
-            listOf("Auto", "Day", "Night"),
-            when (Prefs.themeMode(this)) {
-                AppCompatDelegate.MODE_NIGHT_NO -> 1
-                AppCompatDelegate.MODE_NIGHT_YES -> 2
-                else -> 0
-            }, 164
-        ) { i ->
-            val mode = when (i) {
-                1 -> AppCompatDelegate.MODE_NIGHT_NO
-                2 -> AppCompatDelegate.MODE_NIGHT_YES
-                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            }
-            Prefs.setThemeMode(this, mode)
-            AppCompatDelegate.setDefaultNightMode(mode)
-        }
-        c2.addSegmented(
-            "Notification", R.drawable.ic_bell, R.color.tile_red,
-            listOf("Hidden", "Low", "Normal"), Prefs.notifPriority(this), 164
-        ) { i ->
-            Prefs.setNotifPriority(this, i)
-            if (Prefs.featureEnabled(this)) VolumePowerForegroundService.start(this)
+            "Lock with admin (PIN after)", R.drawable.ic_lock,
+            activeAdmin && Prefs.useAdminLock(this)
+        ) { enabled ->
+            Prefs.setUseAdminLock(this, enabled)
         }
 
         // ---- Setup ----
-        page.addView(caption("SETUP"), lp(WRAP, WRAP).apply { topMargin = dp(22); marginStart = dp(16) })
+        page.addView(caption("SETUP"), lp(WRAP, WRAP).apply { topMargin = dp(24); marginStart = dp(4) })
         val c3 = card()
         page.addView(c3, lp(MATCH, WRAP).apply { topMargin = dp(7) })
 
-        c3.addNav("Get Shizuku", R.drawable.ic_download, R.color.tile_blue) {
+        c3.addNav("Get Shizuku", R.drawable.ic_download) {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://shizuku.rikka.app/download/")))
         }
-        c3.addNav("Open Shizuku", R.drawable.ic_open, R.color.tile_teal) {
+        c3.addNav("Open Shizuku", R.drawable.ic_open) {
             val i = packageManager.getLaunchIntentForPackage(ShizukuBridge.PKG)
             if (i != null) startActivity(i)
             else Toast.makeText(this, "Shizuku is not installed", Toast.LENGTH_SHORT).show()
         }
-        c3.addNav("Allow this app", R.drawable.ic_check, R.color.tile_green) {
+        c3.addNav("Allow this app", R.drawable.ic_check) {
             if (!ShizukuBridge.running()) {
                 Toast.makeText(this, "Start Shizuku first", Toast.LENGTH_SHORT).show()
             } else {
                 ShizukuBridge.requestPermission()
             }
         }
-        c3.addNav("Grant all permissions", R.drawable.ic_shield_check, R.color.tile_orange) { grantAll() }
-        c3.addNav("Accessibility settings", R.drawable.ic_accessibility, R.color.tile_indigo) {
+        c3.addNav("Grant all permissions", R.drawable.ic_shield_check) { grantAll() }
+        c3.addNav("Accessibility settings", R.drawable.ic_accessibility) {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
-        c3.addNav("Battery", R.drawable.ic_battery, R.color.tile_green) { openBattery() }
+        c3.addNav("Battery", R.drawable.ic_battery) { openBattery() }
 
         // ---- Advanced (manual ADB) ----
-        page.addView(caption("ADVANCED"), lp(WRAP, WRAP).apply { topMargin = dp(22); marginStart = dp(16) })
+        page.addView(caption("ADVANCED"), lp(WRAP, WRAP).apply { topMargin = dp(24); marginStart = dp(4) })
         page.addView(advancedCard(), lp(MATCH, WRAP).apply { topMargin = dp(7) })
 
         // ---- Creator ----
-        page.addView(caption("CREATOR"), lp(WRAP, WRAP).apply { topMargin = dp(22); marginStart = dp(16) })
+        page.addView(caption("ABOUT"), lp(WRAP, WRAP).apply { topMargin = dp(24); marginStart = dp(4) })
         page.addView(creatorCard(), lp(MATCH, WRAP).apply { topMargin = dp(7) })
     }
 
@@ -248,10 +224,69 @@ class MainActivity : AppCompatActivity() {
 
     // ------------------------------------------------------------------ actions
 
-    private fun refresh() {
+    private fun isDeviceAdminActive(admin: ComponentName): Boolean = try {
+        getSystemService(DevicePolicyManager::class.java).isAdminActive(admin)
+    } catch (_: Exception) {
+        false
+    }
+
+    private fun setDeviceAdminEnabled(admin: ComponentName, enabled: Boolean) {
         val dpm = getSystemService(DevicePolicyManager::class.java)
-        val adminActive = dpm.isAdminActive(ComponentName(this, AdminReceiver::class.java))
-        val battOk = getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(packageName)
+        if (enabled) {
+            try {
+                startActivity(
+                    Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+                        .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin)
+                        .putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.admin_explanation))
+                )
+            } catch (_: Exception) {
+                Toast.makeText(this, "Could not open device admin settings", Toast.LENGTH_SHORT).show()
+                refresh()
+            }
+            return
+        }
+
+        if (!isDeviceAdminActive(admin)) {
+            refresh()
+            return
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Disable device admin?")
+            .setMessage("Volume Power Plus will stop using Device Admin to lock the screen. You can enable it again any time.")
+            .setNegativeButton("Keep enabled") { _, _ -> refresh() }
+            .setPositiveButton("Disable") { _, _ ->
+                try {
+                    dpm.removeActiveAdmin(admin)
+                    Prefs.setUseAdminLock(this, false)
+                    Toast.makeText(this, "Device admin disabled", Toast.LENGTH_SHORT).show()
+                } catch (_: Exception) {
+                    Toast.makeText(this, "Could not disable device admin. Opening Android settings…", Toast.LENGTH_LONG).show()
+                    try {
+                        startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS))
+                    } catch (_: Exception) {
+                    }
+                } finally {
+                    refresh()
+                    swAdmin.postDelayed({ refresh() }, 500)
+                }
+            }
+            .setOnCancelListener { refresh() }
+            .show()
+    }
+
+    private fun refresh() {
+        if (!::statusRow.isInitialized || !::swAdmin.isInitialized || !::swAdminLock.isInitialized) return
+
+        val admin = ComponentName(this, AdminReceiver::class.java)
+        val adminActive = isDeviceAdminActive(admin)
+        val battOk = try {
+            getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(packageName)
+        } catch (_: Exception) {
+            false
+        }
+
+        if (!adminActive && Prefs.useAdminLock(this)) Prefs.setUseAdminLock(this, false)
 
         statusRow.removeAllViews()
         addStatus("Access", SelfHeal.isServiceEnabled(this))
@@ -261,10 +296,14 @@ class MainActivity : AppCompatActivity() {
         addStatus("Battery", battOk)
 
         refreshing = true
-        swAdmin.isChecked = adminActive
-        swAdminLock.isEnabled = adminActive
-        (swAdminLock.parent as View).alpha = if (adminActive) 1f else 0.4f
-        refreshing = false
+        try {
+            swAdmin.isChecked = adminActive
+            swAdminLock.isChecked = adminActive && Prefs.useAdminLock(this)
+            swAdminLock.isEnabled = adminActive
+            (swAdminLock.parent as? View)?.alpha = if (adminActive) 1f else 0.55f
+        } finally {
+            refreshing = false
+        }
     }
 
     private fun openBattery() {
@@ -367,19 +406,19 @@ class MainActivity : AppCompatActivity() {
         val head = LinearLayout(this)
         head.orientation = LinearLayout.HORIZONTAL
         head.gravity = Gravity.CENTER_VERTICAL
-        head.addView(iconTile(R.drawable.ic_terminal, R.color.tile_gray), lp(dp(30), dp(30)).apply { marginEnd = dp(12) })
+        head.addView(iconTile(R.drawable.ic_terminal), lp(dp(36), dp(36)).apply { marginEnd = dp(12) })
         val ht = LinearLayout(this)
         ht.orientation = LinearLayout.VERTICAL
         val h1 = TextView(this)
         h1.text = "Manual ADB"
         h1.textSize = 16f
         h1.typeface = Typeface.DEFAULT_BOLD
-        h1.setTextColor(col(R.color.ios_label))
+        h1.setTextColor(col(R.color.md_on_surface))
         ht.addView(h1, lp(WRAP, WRAP))
         val h2 = TextView(this)
         h2.text = "Only needed without Shizuku"
         h2.textSize = 12f
-        h2.setTextColor(col(R.color.ios_secondary))
+        h2.setTextColor(col(R.color.md_on_surface_variant))
         ht.addView(h2, lp(WRAP, WRAP))
         head.addView(ht, lp(0, WRAP, 1f))
         c.addView(head, lp(MATCH, WRAP))
@@ -419,10 +458,10 @@ class MainActivity : AppCompatActivity() {
         avatar.textSize = 16f
         avatar.typeface = Typeface.DEFAULT_BOLD
         avatar.gravity = Gravity.CENTER
-        avatar.setTextColor(Color.WHITE)
+        avatar.setTextColor(col(R.color.md_on_primary_container))
         avatar.background = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
-            setColor(col(R.color.ios_blue))
+            setColor(col(R.color.md_primary_container))
         }
         who.addView(avatar, lp(dp(46), dp(46)).apply { marginEnd = dp(14) })
         val texts = LinearLayout(this)
@@ -430,18 +469,18 @@ class MainActivity : AppCompatActivity() {
         val small = TextView(this)
         small.text = "Created by"
         small.textSize = 12f
-        small.setTextColor(col(R.color.ios_secondary))
+        small.setTextColor(col(R.color.md_on_surface_variant))
         texts.addView(small, lp(WRAP, WRAP))
         val name = TextView(this)
         name.text = CREATOR_NAME
         name.textSize = 18f
         name.typeface = Typeface.DEFAULT_BOLD
-        name.setTextColor(col(R.color.ios_label))
+        name.setTextColor(col(R.color.md_on_surface))
         texts.addView(name, lp(WRAP, WRAP))
         who.addView(texts, lp(0, WRAP, 1f))
         c.addView(who, lp(MATCH, WRAP))
 
-        c.addNav("t.me/GulamAzamFaridi", R.drawable.ic_send, R.color.tile_telegram) { openTelegram() }
+        c.addNav("t.me/GulamAzamFaridi", R.drawable.ic_send) { openTelegram() }
         return c
     }
 
@@ -451,8 +490,9 @@ class MainActivity : AppCompatActivity() {
         val c = LinearLayout(this)
         c.orientation = LinearLayout.VERTICAL
         c.background = GradientDrawable().apply {
-            setColor(col(R.color.ios_card))
-            cornerRadius = dp(14).toFloat()
+            setColor(col(R.color.md_surface))
+            cornerRadius = dp(20).toFloat()
+            setStroke(dp(1), col(R.color.md_outline_variant))
         }
         c.clipToOutline = true
         return c
@@ -462,21 +502,23 @@ class MainActivity : AppCompatActivity() {
         val t = TextView(this)
         t.text = text
         t.textSize = 12f
-        t.letterSpacing = 0.05f
-        t.setTextColor(col(R.color.ios_secondary))
+        t.typeface = Typeface.DEFAULT_BOLD
+        t.letterSpacing = 0.08f
+        t.setTextColor(col(R.color.md_on_surface_variant))
         return t
     }
 
-    /** Coloured rounded square with a white glyph, like the icons in iOS Settings. */
-    private fun iconTile(icon: Int, tint: Int): View {
+    /** A single, consistent Material 3 icon treatment rather than colorful app-like tiles. */
+    private fun iconTile(icon: Int): View {
         val tile = FrameLayout(this)
         tile.background = GradientDrawable().apply {
-            setColor(col(tint))
-            cornerRadius = dp(7).toFloat()
+            setColor(col(R.color.md_primary_container))
+            cornerRadius = dp(12).toFloat()
         }
         val iv = ImageView(this)
         iv.setImageResource(icon)
-        tile.addView(iv, FrameLayout.LayoutParams(dp(18), dp(18), Gravity.CENTER))
+        iv.imageTintList = ColorStateList.valueOf(col(R.color.md_on_primary_container))
+        tile.addView(iv, FrameLayout.LayoutParams(dp(20), dp(20), Gravity.CENTER))
         return tile
     }
 
@@ -484,45 +526,48 @@ class MainActivity : AppCompatActivity() {
         val r = LinearLayout(this)
         r.orientation = LinearLayout.HORIZONTAL
         r.gravity = Gravity.CENTER_VERTICAL
-        r.minimumHeight = dp(52)
-        r.setPadding(dp(14), dp(4), dp(14), dp(4))
+        r.minimumHeight = dp(60)
+        r.setPadding(dp(16), dp(4), dp(16), dp(4))
         return r
     }
 
     private fun labelView(text: String): TextView {
         val t = TextView(this)
         t.text = text
-        t.textSize = 16f
-        t.setTextColor(col(R.color.ios_label))
+        t.textSize = 15f
+        t.maxLines = 1
+        t.setTextColor(col(R.color.md_on_surface))
         return t
     }
 
     private fun rowRipple(row: View) {
-        row.background = RippleDrawable(ColorStateList.valueOf(0x22808080), null, ColorDrawable(Color.BLACK))
+        val primary = col(R.color.md_primary)
+        val rippleColor = ColorStateList.valueOf(
+            Color.argb(28, Color.red(primary), Color.green(primary), Color.blue(primary))
+        )
+        row.background = RippleDrawable(rippleColor, null, ColorDrawable(Color.WHITE))
+        row.isClickable = true
+        row.isFocusable = true
     }
 
     private fun LinearLayout.addRow(row: View) {
         if (childCount > 0) {
             val line = View(this@MainActivity)
-            line.setBackgroundColor(col(R.color.ios_sep))
-            addView(line, lp(MATCH, 1).apply { marginStart = dp(56) })
+            line.setBackgroundColor(col(R.color.md_outline_variant))
+            addView(line, lp(MATCH, dp(1)).apply { marginStart = dp(64) })
         }
         addView(row, lp(MATCH, WRAP))
     }
 
     private fun LinearLayout.addSwitch(
-        label: String, icon: Int, tint: Int, checked: Boolean, onChange: (Boolean) -> Unit
+        label: String, icon: Int, checked: Boolean, onChange: (Boolean) -> Unit
     ): MaterialSwitch {
         val row = rowContainer()
-        row.addView(iconTile(icon, tint), lp(dp(30), dp(30)).apply { marginEnd = dp(12) })
-        row.addView(labelView(label), lp(0, WRAP, 1f))
+        row.addView(iconTile(icon), lp(dp(36), dp(36)).apply { marginEnd = dp(12) })
+        row.addView(labelView(label), lp(0, WRAP, 1f).apply { marginEnd = dp(8) })
         val sw = MaterialSwitch(this@MainActivity)
-        sw.thumbIconDrawable = null
-        sw.thumbTintList = ColorStateList.valueOf(Color.WHITE)
-        sw.trackTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.ios_switch_track)
-        sw.trackDecorationTintList = ColorStateList.valueOf(Color.TRANSPARENT)
         sw.isChecked = checked
-        sw.setOnCheckedChangeListener { _, v -> if (!refreshing) onChange(v) }
+        sw.setOnCheckedChangeListener { _, value -> if (!refreshing) onChange(value) }
         row.addView(sw, lp(WRAP, WRAP))
         rowRipple(row)
         row.setOnClickListener { if (sw.isEnabled) sw.toggle() }
@@ -530,50 +575,60 @@ class MainActivity : AppCompatActivity() {
         return sw
     }
 
-    private fun LinearLayout.addSegmented(
-        label: String, icon: Int, tint: Int, items: List<String>, selected: Int, widthDp: Int,
-        onSelect: (Int) -> Unit
+    private fun LinearLayout.addChoice(
+        label: String, icon: Int, items: List<String>, selected: Int, onSelect: (Int) -> Unit
     ) {
         val row = rowContainer()
-        row.addView(iconTile(icon, tint), lp(dp(30), dp(30)).apply { marginEnd = dp(12) })
-        row.addView(labelView(label), lp(0, WRAP, 1f))
-        row.addView(Segmented(this@MainActivity, items, selected, onSelect), lp(dp(widthDp), dp(32)))
+        row.addView(iconTile(icon), lp(dp(36), dp(36)).apply { marginEnd = dp(12) })
+        row.addView(labelView(label), lp(0, WRAP, 1f).apply { marginEnd = dp(8) })
+        val group = ChipGroup(this@MainActivity).apply {
+            isSingleSelection = true
+            isSelectionRequired = true
+            isSingleLine = true
+            chipSpacingHorizontal = dp(4)
+        }
+        items.forEachIndexed { index, item ->
+            val chip = Chip(this@MainActivity).apply {
+                id = View.generateViewId()
+                text = item
+                isCheckable = true
+                isChecked = index == selected
+                setEnsureMinTouchTargetSize(false)
+                setOnClickListener { onSelect(index) }
+            }
+            group.addView(chip)
+        }
+        row.addView(group, lp(WRAP, WRAP))
         addRow(row)
     }
 
-    /** Tappable list row with a chevron. */
-    private fun LinearLayout.addNav(label: String, icon: Int, tint: Int, onClick: () -> Unit) {
+    /** Tappable list row with a Material-style icon and chevron. */
+    private fun LinearLayout.addNav(label: String, icon: Int, onClick: () -> Unit) {
         val row = rowContainer()
-        row.addView(iconTile(icon, tint), lp(dp(30), dp(30)).apply { marginEnd = dp(12) })
+        row.addView(iconTile(icon), lp(dp(36), dp(36)).apply { marginEnd = dp(12) })
         row.addView(labelView(label), lp(0, WRAP, 1f))
         val chevron = ImageView(this@MainActivity)
         chevron.setImageResource(R.drawable.ic_chevron)
-        chevron.imageTintList = ColorStateList.valueOf(col(R.color.ios_secondary))
-        row.addView(chevron, lp(dp(16), dp(16)))
+        chevron.imageTintList = ColorStateList.valueOf(col(R.color.md_on_surface_variant))
+        row.addView(chevron, lp(dp(18), dp(18)))
         rowRipple(row)
-        row.isClickable = true
-        row.isFocusable = true
         row.setOnClickListener { onClick() }
         addRow(row)
     }
 
-    private fun pill(label: String, onClick: () -> Unit): TextView {
-        val t = TextView(this)
-        t.text = label
-        t.textSize = 14f
-        t.typeface = Typeface.DEFAULT_BOLD
-        t.gravity = Gravity.CENTER
-        t.maxLines = 1
-        t.setTextColor(col(R.color.ios_blue))
-        val shape = GradientDrawable().apply {
-            setColor(col(R.color.ios_btn))
-            cornerRadius = dp(12).toFloat()
+    private fun pill(label: String, onClick: () -> Unit): MaterialButton {
+        return MaterialButton(this).apply {
+            text = label
+            textSize = 14f
+            isAllCaps = false
+            setTextColor(col(R.color.md_on_primary_container))
+            backgroundTintList = ColorStateList.valueOf(col(R.color.md_primary_container))
+            cornerRadius = dp(14)
+            insetTop = 0
+            insetBottom = 0
+            minimumHeight = dp(44)
+            setOnClickListener { onClick() }
         }
-        t.background = RippleDrawable(ColorStateList.valueOf(0x22808080), shape, null)
-        t.isClickable = true
-        t.isFocusable = true
-        t.setOnClickListener { onClick() }
-        return t
     }
 
     private fun step(n: Int, text: String): LinearLayout {
@@ -581,19 +636,19 @@ class MainActivity : AppCompatActivity() {
         r.orientation = LinearLayout.HORIZONTAL
         val badge = TextView(this)
         badge.text = n.toString()
-        badge.textSize = 11f
+        badge.textSize = 12f
         badge.typeface = Typeface.DEFAULT_BOLD
         badge.gravity = Gravity.CENTER
-        badge.setTextColor(Color.WHITE)
+        badge.setTextColor(col(R.color.md_on_primary_container))
         badge.background = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
-            setColor(col(R.color.ios_blue))
+            setColor(col(R.color.md_primary_container))
         }
-        r.addView(badge, lp(dp(20), dp(20)).apply { marginEnd = dp(10); topMargin = dp(1) })
+        r.addView(badge, lp(dp(24), dp(24)).apply { marginEnd = dp(10); topMargin = dp(1) })
         val t = TextView(this)
         t.text = text
         t.textSize = 14f
-        t.setTextColor(col(R.color.ios_label))
+        t.setTextColor(col(R.color.md_on_surface))
         r.addView(t, lp(0, WRAP, 1f))
         return r
     }
@@ -605,18 +660,19 @@ class MainActivity : AppCompatActivity() {
         r.gravity = Gravity.CENTER_VERTICAL
         r.setPadding(dp(12), dp(10), dp(10), dp(10))
         r.background = GradientDrawable().apply {
-            setColor(col(R.color.ios_code))
-            cornerRadius = dp(10).toFloat()
+            setColor(col(R.color.md_surface_variant))
+            cornerRadius = dp(12).toFloat()
         }
         val t = TextView(this)
         t.text = text
         t.typeface = Typeface.MONOSPACE
         t.textSize = 12f
-        t.setTextColor(col(R.color.ios_label))
+        t.setTextColor(col(R.color.md_on_surface))
         r.addView(t, lp(0, WRAP, 1f))
         val copy = ImageView(this)
         copy.setImageResource(R.drawable.ic_copy)
-        copy.imageTintList = ColorStateList.valueOf(col(R.color.ios_blue))
+        copy.imageTintList = ColorStateList.valueOf(col(R.color.md_primary))
+        copy.contentDescription = "Copy command"
         r.addView(copy, lp(dp(18), dp(18)).apply { marginStart = dp(8) })
         r.isClickable = true
         r.isFocusable = true
@@ -631,15 +687,16 @@ class MainActivity : AppCompatActivity() {
         val dot = View(this)
         dot.background = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
-            setColor(col(if (ok) R.color.ios_green else R.color.ios_red))
+            setColor(col(if (ok) R.color.md_success else R.color.md_error))
         }
-        item.addView(dot, lp(dp(8), dp(8)).apply { marginEnd = dp(5) })
+        item.addView(dot, lp(dp(7), dp(7)).apply { marginEnd = dp(4) })
         val t = TextView(this)
         t.text = label
-        t.textSize = 12f
+        t.textSize = 11f
         t.maxLines = 1
-        t.setTextColor(col(R.color.ios_secondary))
+        t.setTextColor(col(R.color.md_on_surface_variant))
         item.addView(t, lp(WRAP, WRAP))
         statusRow.addView(item, lp(0, WRAP, 1f))
     }
+
 }

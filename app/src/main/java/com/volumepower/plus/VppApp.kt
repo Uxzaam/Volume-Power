@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Intent
 import android.os.Build
 import android.util.Log
-import androidx.appcompat.app.AppCompatDelegate
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -14,7 +13,6 @@ class VppApp : Application() {
         // The crash screen runs in its own process; keep it free of any other start-up work.
         if (Application.getProcessName().endsWith(":crash")) return
         installCrashHandler()
-        AppCompatDelegate.setDefaultNightMode(Prefs.themeMode(this))
     }
 
     private fun installCrashHandler() {

@@ -24,18 +24,10 @@ object Prefs {
     fun useAdminLock(c: Context) = sp(c).getBoolean("adminlock", false)
     fun setUseAdminLock(c: Context, v: Boolean) = sp(c).edit().putBoolean("adminlock", v).apply()
 
-    /** AppCompatDelegate night mode: -1 follow system, 1 light, 2 dark */
-    fun themeMode(c: Context) = sp(c).getInt("theme", -1)
-    fun setThemeMode(c: Context, v: Int) = sp(c).edit().putInt("theme", v).apply()
-
-    /** Notification priority: 0 hidden (min), 1 low, 2 normal */
-    fun notifPriority(c: Context) = sp(c).getInt("notif", 0)
-    fun setNotifPriority(c: Context, v: Int) = sp(c).edit().putInt("notif", v).apply()
-
     fun shizukuKeys(c: Context) = sp(c).getBoolean("shizuku", true)
     fun setShizukuKeys(c: Context, v: Boolean) = sp(c).edit().putBoolean("shizuku", v).apply()
 
-    /** Wake the screen during calls even when the proximity sensor is stuck "near" (e.g. glass protector). */
+    /** Wake the screen during calls even when the proximity sensor is stuck "near". */
     fun callFix(c: Context) = sp(c).getBoolean("callfix", true)
     fun setCallFix(c: Context, v: Boolean) = sp(c).edit().putBoolean("callfix", v).apply()
 }

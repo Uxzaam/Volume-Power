@@ -27,13 +27,34 @@ class VolumePowerAccessibilityService : AccessibilityService() {
     private fun lockScreen() {
         val dpm = getSystemService(DevicePolicyManager::class.java)
         val admin = ComponentName(this, AdminReceiver::class.java)
-        val adminActive = dpm.isAdminActive(admin)
-        if (Prefs.useAdminLock(this) && adminActive) {
-            dpm.lockNow()
-            return
+        val adminActive = try {
+            dpm.isAdminActive(admin)
+        } catch (_: Exception) {
+            false
         }
-        // Behaves like a real power-button press (keeps fingerprint unlock).
-        if (!performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN) && adminActive) dpm.lockNow()
+
+        if (Prefs.useAdminLock(this) && adminActive) {
+            try {
+                dpm.lockNow()
+                return
+            } catch (_: Exception) {
+                // Admin privileges may be revoked while this key event is being handled.
+            }
+        }
+
+        // Prefer Android's accessibility lock action, which preserves fingerprint unlock.
+        val locked = try {
+            performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)
+        } catch (_: Exception) {
+            false
+        }
+        if (!locked && adminActive) {
+            try {
+                dpm.lockNow()
+            } catch (_: Exception) {
+                // The admin permission may have been revoked between the state check and lock.
+            }
+        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {}

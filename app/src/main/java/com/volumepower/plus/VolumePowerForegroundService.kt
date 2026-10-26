@@ -55,15 +55,10 @@ class VolumePowerForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val nm = getSystemService(NotificationManager::class.java)
-        val level = Prefs.notifPriority(this)
-        val channelId = CHANNEL_PREFIX + level
-        val importance = when (level) {
-            0 -> NotificationManager.IMPORTANCE_MIN
-            1 -> NotificationManager.IMPORTANCE_LOW
-            else -> NotificationManager.IMPORTANCE_DEFAULT
-        }
+        val channelId = CHANNEL_ID
         nm.createNotificationChannel(
-            NotificationChannel(channelId, "Volume Power Plus", importance).apply {
+            NotificationChannel(channelId, "Volume Power Plus", NotificationManager.IMPORTANCE_LOW).apply {
+                description = "Keeps volume-key controls available in the background"
                 setSound(null, null)
                 enableVibration(false)
                 setShowBadge(false)
@@ -85,7 +80,7 @@ class VolumePowerForegroundService : Service() {
         }
 
         nm.notificationChannels
-            .filter { it.id != channelId && it.id.startsWith("vpp_keepalive") }
+            .filter { it.id.startsWith(LEGACY_CHANNEL_PREFIX) }
             .forEach { try { nm.deleteNotificationChannel(it.id) } catch (_: Exception) {} }
 
         contentResolver.unregisterContentObserver(observer)
@@ -214,7 +209,8 @@ class VolumePowerForegroundService : Service() {
     }
 
     companion object {
-        private const val CHANNEL_PREFIX = "vpp_keepalive_"
+        private const val CHANNEL_ID = "vpp_service"
+        private const val LEGACY_CHANNEL_PREFIX = "vpp_keepalive_"
 
         fun start(c: Context) {
             try {
